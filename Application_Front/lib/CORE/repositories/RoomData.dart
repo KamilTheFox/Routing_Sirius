@@ -59,6 +59,11 @@ class Vector2
     return other is Vector2 && other.x == x && other.y == y;
   }
 
+  static Vector2 zero()
+  {
+    return new Vector2(x: 0, y: 0);
+  }
+
   @override
   int get hashCode => x.hashCode ^ y.hashCode;
 
@@ -88,12 +93,14 @@ class RoomData
   final int floor;
   final int parent;
   final String name;
+
+  final Vector2 correctionCenterText;
   
   final RoomBounds bounds;
 
   late Vector2 LeftTopPosition; 
 
-  RoomData({required this.id, required this.floor, required this.parent, required this.name, required this.bounds});
+  RoomData({required this.id, required this.floor, required this.parent, required this.name, required this.bounds, required this.correctionCenterText});
 
   factory RoomData.ToJson(Map<String, dynamic> json)
   {
@@ -102,7 +109,8 @@ class RoomData
       floor: json['floor'] ?? -1,
       parent: json['parent'] ?? -1,
       name: json['name'] ?? 'none',
-      bounds: RoomBounds.Create(json['id'],json['bounds'])
+      bounds: RoomBounds.Create(json['id'],json['bounds']),
+      correctionCenterText: json['correctCenter'] ?? Vector2(x: 0, y: 0)
     );
   }
 
@@ -201,13 +209,23 @@ class _ClickableRoomBoundsState extends State<_ClickableRoomBounds> {
         onPointerDown: (event) {
           _handleTapDown(event);
         },
-        child: CustomPaint(
-          painter: _RoomPainter(
-            bounds: newRoomBounds,
-            offset: Offset(-minX, -minY),
-            isPressed: _isPressed,
-          ),
+        child: Stack(
+
+          children: [
+            CustomPaint(
+              painter: _RoomPainter(
+                bounds: newRoomBounds,
+                offset: Offset(-minX, -minY),
+                isPressed: _isPressed,
+              ),
+            ),
+            Align(
+            alignment: Alignment(Alignment.center.x + widget.data.correctionCenterText.x, Alignment.center.y + widget.data.correctionCenterText.y),
+            child: Text(widget.data.name, style: TextStyle(color: Colors.black, fontSize: min((maxX - minX) / maxX * 20, 15),))
+            ),
+          ],
         ),
+        
       ),
     );
   }

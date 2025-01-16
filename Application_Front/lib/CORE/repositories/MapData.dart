@@ -111,7 +111,8 @@ class MapData
                 parent: room['parent'] ?? -1, 
                 name: room['name'],
                 bounds: RoomBounds.Create(id, room['bounds']
-                )
+                ),
+                correctionCenterText: Vector2(x: 0, y: 0)
             );
   }
 
