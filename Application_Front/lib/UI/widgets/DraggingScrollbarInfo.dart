@@ -129,7 +129,7 @@ class RouteSheetState extends State<RouteSheet> {
                   updateDisplayMode(RouteSheetDisplayMode.routeButtonStart);
                 },
                 style:  ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 55, 32, 126)
+                  backgroundColor: const Color.fromARGB(255, 49, 69, 93)
                 ),
                 child: const Text('Сбросить маршрут',style: TextStyle(color: Colors.white),),
               ),
@@ -196,6 +196,7 @@ class RouteSheetState extends State<RouteSheet> {
             ),
           ),
           const SizedBox(height: 8),
+          _buildBuildRouteButton(),
       ],
     );
   }
@@ -219,7 +220,7 @@ class RouteSheetState extends State<RouteSheet> {
                   updateDisplayMode(RouteSheetDisplayMode.routeButtonStart);
                 },
                 style:  ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 55, 32, 126)
+                  backgroundColor: const Color.fromARGB(255, 49, 69, 93)
                 ),
                 child: const Text('Отсюда',style: TextStyle(color: Colors.white)),
               ),
@@ -232,7 +233,7 @@ class RouteSheetState extends State<RouteSheet> {
                   updateDisplayMode(RouteSheetDisplayMode.routeButtonStart);
                 },
                 style:  ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 55, 32, 126)
+                  backgroundColor: const Color.fromARGB(255, 49, 69, 93)
                 ),
                 child: const Text('Сюда',style: TextStyle(color: Colors.white),),
               ),
@@ -251,7 +252,7 @@ class RouteSheetState extends State<RouteSheet> {
         onPressed: canBuildRoute ? _buildRoute : null,
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 50),
-          backgroundColor: canBuildRoute ? const Color.fromARGB(255, 55, 32, 126) : const Color.fromARGB(255, 113, 103, 146),
+          backgroundColor: canBuildRoute ? const Color.fromARGB(255, 49, 69, 93) : const Color.fromARGB(255, 39, 59, 83),
         ),
         child: const Text(
           'Построить маршрут',
@@ -318,91 +319,100 @@ class RouteSheetState extends State<RouteSheet> {
     }
   }
 
-  Widget _buildDraggableScrollableSheet()
-  {
-    
-    var minChildSize = _buildTargetSnapSize(_displayMode)[0];
+Widget _buildDraggableScrollableSheet() {
+  var minChildSize = _buildTargetSnapSize(_displayMode)[0];
 
-    return  DraggableScrollableSheet(
-      controller: widget.dragController,
-      initialChildSize: _buildTargetSnapCurrent(_displayMode),
-      minChildSize: minChildSize,
-      maxChildSize: 0.9,
-      snapAnimationDuration: const Duration(milliseconds: 300),
-      snap: true,
-      snapSizes: _buildTargetSnapSize(_displayMode),
-      builder: (context, scrollController) {
-        
-        widget.dragController.addListener(() {
-            _sheetPosition = scrollController.position.viewportDimension / 
-                            MediaQuery.of(context).size.height;
-            isVisibleNotifier.value = _sheetPosition > (minChildSize + 0.15);
-        });
-        var content = _buildTargetWidget(_displayMode);
+  return DraggableScrollableSheet(
+    controller: widget.dragController,
+    initialChildSize: _buildTargetSnapCurrent(_displayMode),
+    minChildSize: minChildSize,
+    maxChildSize: 0.9,
+    snapAnimationDuration: const Duration(milliseconds: 300),
+    snap: true,
+    snapSizes: _buildTargetSnapSize(_displayMode),
+    builder: (context, scrollController) {
+      widget.dragController.addListener(() {
+        _sheetPosition = scrollController.position.viewportDimension /
+            MediaQuery.of(context).size.height;
         isVisibleNotifier.value = _sheetPosition > (minChildSize + 0.15);
-         var updateBuildContent = ValueListenableBuilder<bool>(
-          valueListenable: isVisibleNotifier,
-          builder: (context, isVisible, child) 
-          {
-            final currentSheetSize = widget.dragController.size;
-            final shouldBeVisible = currentSheetSize > (minChildSize + 0.15);
-            if (isVisible != shouldBeVisible) {
-              // Обновляем notifier в следующем кадре
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                isVisibleNotifier.value = shouldBeVisible;
-              });
-            }
-            return _displayMode == RouteSheetDisplayMode.routeButtonStart ? AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: isVisible ? 1.0 : 0.0,
-              child:  content,
-            ) : content;
-          },
-        );
+      });
 
-        var stackContent = Stack(
-                children: [
-                  ListView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+      return ValueListenableBuilder<bool>(
+        valueListenable: isVisibleNotifier,
+        builder: (context, isVisible, child) {
+          Widget contentWidget;
+          
+          // Простое условное отображение без анимаций
+          if (_displayMode == RouteSheetDisplayMode.routeButtonStart && !isVisible) {
+            contentWidget = Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  widget.dragController.animateTo(
+                    0.35,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                  isVisibleNotifier.value = true;
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.white,
+                ),
+                child: const Text(
+                  'Задать маршрут',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            contentWidget = _buildTargetWidget(_displayMode);
+          }
+
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                )
+              ],
+            ),
+            child: Stack(
+              children: [
+                ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      updateBuildContent
-                    ],
-                  ),
-                  if(_displayMode == RouteSheetDisplayMode.roomSelection) 
-                    buildCloseButton(),
-                ],
-            );
-       
-        var containerContent = Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-              )
-            ],
-          ),
-          child: stackContent
-        );
-        return containerContent;
-      },
-    );
-  }
-
+                    ),
+                    contentWidget,
+                  ],
+                ),
+                if (_displayMode == RouteSheetDisplayMode.roomSelection)
+                  buildCloseButton(),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
   @override
   Widget build(BuildContext context) {
     var selectedRoomName = "";
@@ -411,20 +421,20 @@ class RouteSheetState extends State<RouteSheet> {
     }
     var sheet = _buildDraggableScrollableSheet();
 
-    var stack = Stack(
-      children: [
-          sheet,
-          if(_displayMode == RouteSheetDisplayMode.routeButtonStart)
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: _buildBuildRouteButton(),
-            ),
+    // var stack = Stack(
+    //   children: [
+    //       sheet,
+    //       if(_displayMode == RouteSheetDisplayMode.routeButtonStart)
+    //         Positioned(
+    //           left: 16,
+    //           right: 16,
+    //           bottom: 16,
+    //           child: _buildBuildRouteButton(),
+    //         ),
           
-      ]
-    );
+    //   ]
+    // );
 
-    return stack;
+    return sheet;
   }
 }

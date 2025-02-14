@@ -76,7 +76,7 @@ class ApiClient {
           return Exception('Превышено время ожидания ответа');
         case DioExceptionType.badResponse:
           if (error.response?.statusCode == 401) {
-            return Exception('Неавторизован');
+            return Exception('401');
           }
           return Exception('Ошибка сервера: ${error.response?.statusCode}');
         case DioExceptionType.cancel:

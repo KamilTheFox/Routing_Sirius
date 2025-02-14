@@ -32,7 +32,7 @@ class _AuthenticationMenuState extends State<AuthenticationMenu> {
   void initState() 
   {
     super.initState();
-    interactiveButton = SimpleButton(backgroundColor: LoginScreen.colorComponents);
+    interactiveButton = SimpleButton(backgroundColor: const Color.fromARGB(255, 49, 69, 93));
     writeField = SimpleTextField(backgroundColor: Colors.white);
     SystemChrome.setPreferredOrientations(
     [
@@ -44,7 +44,7 @@ class _AuthenticationMenuState extends State<AuthenticationMenu> {
   @override
   Widget build(BuildContext context) 
   {
-    Color bcColor = LoginScreen.colorComponents;
+    Color bcColor = const Color.fromARGB(255, 49, 69, 93);
     interactiveButton.SetLock(_isLocding);
 
     Text title = Text(
@@ -96,8 +96,10 @@ class _AuthenticationMenuState extends State<AuthenticationMenu> {
     }
     catch(e)
     {
-      if (e.toString().contains('404') || 
-            e.toString().contains('StatusCode: 404')) {
+      if (e.toString().contains('401') || 
+            e.toString().contains('404') || 
+            e.toString().contains('StatusCode: 404')) 
+        {
           screen.ShowErrorDialog('Неверный логин или пароль');
         } else if (e.toString().contains('NetworkException') || 
                   e.toString().contains('SocketException')) {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget 
 {
-  static const Color colorComponents = Color.fromARGB(255, 55, 32, 126);
+  static const Color colorComponents = Color.fromARGB(255, 49, 69, 93);
 
   late BuildContext _currentContext;
 

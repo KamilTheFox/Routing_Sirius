@@ -67,16 +67,19 @@ class Vector2
 
 class RoomBounds {
   final int id;
+  final String shortName;
   final List<Vector2> bounds;
   
   RoomBounds({
     required this.id,
     required this.bounds,
+    required this.shortName
   });
 
-  factory RoomBounds.Create(int id,List<dynamic> json) {
+  factory RoomBounds.Create(int id, String shortName,List<dynamic> json) {
     return RoomBounds(
       id: id,
+      shortName: shortName,
       bounds: json.map((e) => Vector2.ToJson(e))
             .toList()
     );
@@ -89,12 +92,13 @@ class RoomData
   final int floor;
   final int parent;
   final String name;
+  final String shortName;
   
   final RoomBounds bounds;
 
   late Vector2 LeftTopPosition; 
 
-  RoomData({required this.id, required this.floor, required this.parent, required this.name, required this.bounds});
+  RoomData({required this.id, required this.floor, required this.parent, required this.name, required this.bounds,required this.shortName});
 
   factory RoomData.ToJson(Map<String, dynamic> json)
   {
@@ -103,7 +107,8 @@ class RoomData
       floor: json['floor'] ?? -1,
       parent: json['parent'] ?? -1,
       name: json['name'] ?? 'none',
-      bounds: RoomBounds.Create(json['id'],json['bounds'])
+      shortName: json['short_name'] ?? 'none',
+      bounds: RoomBounds.Create(json['id'], json['short_name'] ?? 'none' ,json['bounds'])
     );
   }
 
@@ -201,7 +206,7 @@ class _ClickableRoomBoundsState extends State<_ClickableRoomBounds> {
                     );
                 }).toList();
     
-    boundsOffset = RoomBounds(id: widget.data.bounds.id, bounds: boundsClick);
+    boundsOffset = RoomBounds(id: widget.data.bounds.id, shortName: widget.data.shortName ,bounds: boundsClick);
 
     return Positioned(
       left: minX,
@@ -293,9 +298,41 @@ abstract class BaseRoomPainter extends CustomPainter {
   bool hitTest(Offset position) {
     return createPath().contains(position);
   }
+
+  void drawTextInPath(Canvas canvas, String text, Path path) {
+  final bounds = path.getBounds();
+  final initialFontSize = 14.0;
+  
+  TextPainter createPainter(double fontSize) => TextPainter(
+    text: TextSpan(
+      text: text,
+      style: TextStyle(
+        color: Colors.black,
+        fontSize: fontSize,
+      ),
+    ),
+    textDirection: TextDirection.ltr,
+  );
+
+  var fontSize = initialFontSize;
+  var textPainter = createPainter(fontSize);
+  textPainter.layout();
+
+  while ((textPainter.width >= bounds.width  - 2|| textPainter.height  >= bounds.height- 2)) { 
+    fontSize -= 1;
+    textPainter = createPainter(fontSize);
+    textPainter.layout();
+  }
+
+  final position = Offset(
+    bounds.center.dx - textPainter.width / 2,
+    bounds.center.dy - textPainter.height / 2,
+  );
+  
+  textPainter.paint(canvas, position);
+}
 }
 
-// Класс для обычного состояния
 class DefaultRoomPainter extends BaseRoomPainter {
   DefaultRoomPainter({
     required super.bounds,
@@ -305,17 +342,18 @@ class DefaultRoomPainter extends BaseRoomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color.fromARGB(255, 180, 142, 72).withOpacity(0.5)
+      ..color = const Color.fromARGB(255, 192, 192, 192).withOpacity(0.5)
       ..style = PaintingStyle.fill;
 
     final strokePaint = Paint()
-      ..color = const Color.fromARGB(255, 228, 125, 8)
+      ..color = const Color.fromARGB(255, 68, 68, 68)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 1;
 
     final path = createPath();
     canvas.drawPath(path, paint);
     canvas.drawPath(path, strokePaint);
+    // drawTextInPath(canvas, bounds.shortName, path);
   }
 
   @override
@@ -332,17 +370,18 @@ class PressedRoomPainter extends BaseRoomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color.fromARGB(255, 104, 65, 221).withOpacity(0.3)
+      ..color = const Color.fromARGB(96, 49, 69, 93).withOpacity(0.3)
       ..style = PaintingStyle.fill;
 
     final strokePaint = Paint()
-      ..color = const Color.fromARGB(255, 55, 32, 126)
+      ..color = const Color.fromARGB(255, 49, 69, 93)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 1;
 
     final path = createPath();
     canvas.drawPath(path, paint);
     canvas.drawPath(path, strokePaint);
+    // drawTextInPath(canvas, bounds.shortName, path);
   }
 
   @override

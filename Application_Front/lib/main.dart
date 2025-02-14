@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget
     return MaterialApp(
       title: 'Sirius Routing Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 25, 0, 255)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 49, 69, 93)),
         useMaterial3: true,
       ),
       routes: 

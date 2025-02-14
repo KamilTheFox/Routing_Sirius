@@ -122,7 +122,7 @@ class _PathPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.stroke  
-      ..color = const Color.fromARGB(255, 48, 235, 31)
+      ..color = const Color.fromARGB(255, 49, 69, 93)
       ..strokeWidth = 1
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;

@@ -110,7 +110,8 @@ class MapData
                 floor: room['floor'], 
                 parent: room['parent'] ?? -1, 
                 name: room['name'],
-                bounds: RoomBounds.Create(id, room['bounds']
+                shortName: room['short_name'],
+                bounds: RoomBounds.Create(id,room['short_name'] , room['bounds']
                 )
             );
   }

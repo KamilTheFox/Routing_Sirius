@@ -26,7 +26,7 @@ class InteractiveMap extends StatefulWidget
 
 class _InteractiveMap extends State<InteractiveMap>
   {
-  late final SvgPicture _mapImage;
+  late final Image _mapImage;
 
   late Size _originalSvgSize;
 
@@ -45,12 +45,10 @@ class _InteractiveMap extends State<InteractiveMap>
   {
     _mapData = MapData();
 
-    _mapImage = SvgPicture.asset(
-      'Resources/MainMap.svg',
+    _mapImage = Image.asset(
+      'Resources/Names_rooms.png',
       fit: BoxFit.contain,
-      allowDrawingOutsideViewBox: false,
     );
-
     super.initState();
   }
 
@@ -59,7 +57,7 @@ class _InteractiveMap extends State<InteractiveMap>
       return;
     }
     try {
-      _originalSvgSize = await getSvgSize('Resources/MainMap.svg');
+      _originalSvgSize = await getImageSize('Resources/Names_rooms.png');
       await _mapData.GetRoomData(_originalSvgSize);
 
       setState(() {_isDataLoaded = true;});
@@ -67,10 +65,29 @@ class _InteractiveMap extends State<InteractiveMap>
       print('Ошибка при инициализации данных: $e');
     }
   }
-  Future<Size> getSvgSize(String assetName) async {
-    final picture = await vg.loadPicture(SvgAssetLoader(assetName), null);
-    return picture.size;
+
+  Future<Size> getImageSize(String assetName) async {
+    final ImageProvider provider = AssetImage(assetName);
+    final ImageStream stream = provider.resolve(ImageConfiguration());
+    final Completer<Size> completer = Completer<Size>();
+    
+    final listener = ImageStreamListener(
+      (ImageInfo info, bool synchronousCall) {
+        final Size size = Size(
+          info.image.width.toDouble(),
+          info.image.height.toDouble(),
+        );
+        completer.complete(size);
+      },
+      onError: (dynamic exception, StackTrace? stackTrace) {
+        completer.completeError(exception);
+      },
+    );
+
+    stream.addListener(listener);
+    return completer.future;
   }
+
   @override
  Widget build(BuildContext context) {
     return FutureBuilder(
@@ -116,27 +133,15 @@ class _InteractiveMap extends State<InteractiveMap>
                       svgX * (actualSize.width / _originalSvgSize.width),  // делим на ширину SVG
                       mapTopOffset + (svgY * (actualSize.height / _originalSvgSize.height))  // делим на высоту SVG
                     );
-                    // print("""
-                    // Отладка координат:
-                    // Оригинальные: ($original)
-                    // После SVG scale: ($svgX, $svgY)
-                    // Финальные: ($result)
-                    // Размеры actualSize: ${actualSize.width}x${actualSize.height}
-                    // mapTopOffset: $mapTopOffset
-                    // """);
                     return result;
                   }
 
                 return Stack(
                   children: [
-                    const Align(
-                      alignment: AlignmentDirectional.topStart, 
-                      //child: _mapImage
-                    ),
                     ...MapData.GetRooms.values.map((room) {
                       return room.GetRoomButton(
                         widget.onRoomTap,
-                        transformOffset: calculatePosition  // Передаем функцию трансформации
+                        transformOffset: calculatePosition  
                       );
                     }),
                     RoomOrderPaiting( key: RoomOrderPaiting.globalKey,),
@@ -144,6 +149,12 @@ class _InteractiveMap extends State<InteractiveMap>
                      key: PathPaiting.globalKey,
                      mapData: _mapData,
                      transformOffset: calculatePosition),
+                     Align(
+                      alignment: AlignmentDirectional.center, 
+                      child:IgnorePointer( 
+                          child: _mapImage,
+                        ),
+                    ),
                   ],
                 );
               }
