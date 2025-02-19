@@ -1,0 +1,7 @@
+workflows:
+  ios-workflow:
+    working_directory: FlutterApp
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
