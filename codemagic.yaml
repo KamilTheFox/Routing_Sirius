@@ -1,6 +1,6 @@
 workflows:
   ios-workflow:
-    working_directory: FlutterApp
+    working_directory: Application_Front
     scripts:
       - name: Get Flutter packages
         script: |
